@@ -1,0 +1,19 @@
+{
+  "sqltools.connections": [
+    {
+      "mysqlOptions": {
+        "authProtocol": "default",
+        "enableSsl": "Disabled"
+      },
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 3306,
+      "driver": "MySQL",
+      "name": "my local db",
+      "group": "nexus",
+      "database": "nexusclub_form_submission",
+      "username": "naderyb",
+      "password": "nader@2000"
+    }
+  ]
+}

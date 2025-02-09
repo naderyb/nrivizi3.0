@@ -1,0 +1,26 @@
+{
+  "name": "nrivizi3.0",
+  "version": "1.0.0",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/naderyb/nrivizi3.0.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/naderyb/nrivizi3.0/issues"
+  },
+  "homepage": "https://github.com/naderyb/nrivizi3.0#readme",
+  "description": "",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "express": "^4.21.2",
+    "mysql2": "^3.12.0"
+  }
+}
