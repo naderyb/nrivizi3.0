@@ -1,5 +1,5 @@
 require('dotenv').config(); // Load environment variables from .env
-
+const cors = require('cors');
 const express = require('express');
 const { Client } = require('pg');
 const bcrypt = require('bcrypt'); // For future secure password handling
@@ -10,6 +10,7 @@ const port = process.env.PORT || 3000;
 // Middleware for parsing JSON and URL-encoded data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors());
 
 // PostgreSQL connection configuration using the DATABASE_URL environment variable
 const client = new Client({
