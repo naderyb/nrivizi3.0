@@ -1,38 +1,38 @@
+require('dotenv').config(); // Load environment variables from .env
+
 const express = require('express');
-const mysql = require('mysql2');
-const bcrypt = require('bcrypt'); // Pour une future implémentation du hachage des mots de passe
+const { Client } = require('pg');
+const bcrypt = require('bcrypt'); // For future secure password handling
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middleware pour parser les données JSON et URL-encodées
+// Middleware for parsing JSON and URL-encoded data
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Configuration de la connexion MySQL
-const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'naderyb',
-  password: 'nader@2000',
-  database: 'nexusclub_form_submission'
+// PostgreSQL connection configuration using the DATABASE_URL environment variable
+const client = new Client({
+  connectionString: process.env.DATABASE_URL || 'postgresql://postgres:nader%402000@localhost:5432/nexus'
 });
 
-connection.connect((err) => {
+client.connect((err) => {
   if (err) {
-    console.error('Error connecting to MySQL: ' + err.stack);
+    console.error('Error connecting to PostgreSQL: ' + err.stack);
     return;
   }
-  console.log('Connected to MySQL as id ' + connection.threadId);
+  console.log('Connected to PostgreSQL');
 });
 
-// Route pour traiter le formulaire d'inscription
+// Route to process the submission form
 app.post('/process-form', (req, res) => {
   const { nomPrenom, email, formation, motivation } = req.body;
   if (!nomPrenom || !email || !formation || !motivation) {
     return res.status(400).json({ message: 'Tous les champs sont requis.' });
   }
-  const query = 'INSERT INTO submission (nomPrenom, email, formation, motivation) VALUES (?, ?, ?, ?)';
-  connection.execute(query, [nomPrenom, email, formation, motivation], (error, results) => {
+  // PostgreSQL uses $1, $2, ... as parameter placeholders
+  const query = 'INSERT INTO submission (nomPrenom, email, formation, motivation) VALUES ($1, $2, $3, $4)';
+  client.query(query, [nomPrenom, email, formation, motivation], (error, result) => {
     if (error) {
       console.error('Error inserting data: ', error);
       return res.status(500).json({ message: "Erreur lors de l'enregistrement." });
@@ -41,39 +41,40 @@ app.post('/process-form', (req, res) => {
   });
 });
 
-// Route pour récupérer toutes les inscriptions
+// Route to retrieve all submissions
 app.get('/submissions', (req, res) => {
   const query = 'SELECT * FROM submission';
-  connection.query(query, (error, results) => {
+  client.query(query, (error, result) => {
     if (error) {
       console.error('Error fetching data: ', error);
       return res.status(500).json({ message: 'Error fetching data.' });
     }
-    res.json(results);
+    // PostgreSQL returns rows in result.rows
+    res.json(result.rows);
   });
 });
 
-// Route de connexion admin
+// Route for admin login
 app.post('/admin/login', (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) {
     return res.status(400).json({ success: false, message: 'Tous les champs sont requis.' });
   }
-  const query = 'SELECT * FROM admins WHERE username = ?';
-  connection.execute(query, [username], (error, results) => {
+  const query = 'SELECT * FROM admins WHERE username = $1';
+  client.query(query, [username], (error, result) => {
     if (error) {
       console.error('Erreur lors de la connexion: ', error);
       return res.status(500).json({ success: false, message: 'Erreur interne du serveur.' });
     }
-    if (results.length === 0) {
+    if (result.rows.length === 0) {
       return res.status(401).json({ success: false, message: 'Identifiants incorrects.' });
     }
-    const admin = results[0];
-    // Pour l'instant, comparaison en clair. (En production, utilisez bcrypt pour comparer le hash.)
+    const admin = result.rows[0];
+    // For now, compare plain-text passwords (in production, use bcrypt for secure comparison)
     if (password !== admin.password) {
       return res.status(401).json({ success: false, message: 'Identifiants incorrects.' });
     }
-    // Détermination du nom complet et du rôle selon l'username
+    // Determine full name and role based on username
     let fullName, role;
     if (username === 'yb_nader') {
       fullName = 'Youb Mahmoud Nader';
@@ -84,6 +85,9 @@ app.post('/admin/login', (req, res) => {
     } else if (username === 'bt_selena') {
       fullName = 'Boutaoui Selena';
       role = 'Secrétaire Général';
+    } else if (username === 'bd_hadil') {
+      fullName = 'Bedoud Hadil';
+      role = 'Organisatrice';
     } else {
       fullName = username;
       role = '';
@@ -99,15 +103,15 @@ app.post('/admin/login', (req, res) => {
   });
 });
 
-// Endpoint pour valider une inscription (mise à jour soft)
+// Endpoint to validate a submission (soft update)
 app.put('/submission/validate/:id', (req, res) => {
   const submissionId = req.params.id;
   const { adminUsername } = req.body;
   if (!adminUsername) {
     return res.status(400).json({ message: 'Admin username is required.' });
   }
-  const query = 'UPDATE submission SET validated = 1, validated_by = ? WHERE id = ?';
-  connection.execute(query, [adminUsername, submissionId], (error, results) => {
+  const query = 'UPDATE submission SET validated = true, validated_by = $1 WHERE id = $2';
+  client.query(query, [adminUsername, submissionId], (error, result) => {
     if (error) {
       console.error('Error validating submission: ', error);
       return res.status(500).json({ message: 'Error validating submission.' });
@@ -116,15 +120,15 @@ app.put('/submission/validate/:id', (req, res) => {
   });
 });
 
-// Endpoint pour supprimer (hard delete) une inscription
+// Endpoint to delete (hard delete) a submission
 app.delete('/submission/:id', (req, res) => {
   const submissionId = req.params.id;
   const { adminUsername } = req.body;
   if (!adminUsername) {
     return res.status(400).json({ message: 'Admin username is required.' });
   }
-  const query = 'DELETE FROM submission WHERE id = ?';
-  connection.execute(query, [submissionId], (error, results) => {
+  const query = 'DELETE FROM submission WHERE id = $1';
+  client.query(query, [submissionId], (error, result) => {
     if (error) {
       console.error('Error deleting submission: ', error);
       return res.status(500).json({ message: 'Error deleting submission.' });
@@ -133,10 +137,10 @@ app.delete('/submission/:id', (req, res) => {
   });
 });
 
-// Servir les fichiers statiques depuis le dossier "public"
+// Serve static files from the "public" folder
 app.use(express.static('public'));
 
-// Démarrer le serveur
+// Start the server
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
