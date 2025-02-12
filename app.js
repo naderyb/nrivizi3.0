@@ -50,7 +50,7 @@ app.post('/process-form', (req, res) => {
 
 // Route to retrieve all submissions
 app.get('/submissions', (req, res) => {
-  const query = 'SELECT * FROM submission';
+  const query = 'SELECT nomprenom AS "nomPrenom", email, formation, motivation, submission_date, validated, validated_by, deleted, deleted_by FROM submission';
   client.query(query, (error, result) => {
     if (error) {
       console.error('Error fetching data: ', error);
