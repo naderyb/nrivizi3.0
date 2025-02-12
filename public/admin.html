@@ -40,11 +40,11 @@
       // Confirmer la suppression : envoyer la requête DELETE
       confirmDeleteBtn.addEventListener("click", () => {
           if (submissionToDeleteId) {
-              fetch(`${API_URL}/submission/${submissionToDeleteId}`, {
-                  method: "DELETE",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ adminUsername })
-              })
+            fetch(`${API_URL}/submission/${submissionToDeleteId}?adminUsername=${encodeURIComponent(adminUsername)}`, {
+              method: "DELETE", 
+              headers: { "Content-Type": "application/json" }
+            })
+
               .then(response => {
                   if (!response.ok) {
                       throw new Error(`HTTP error! status: ${response.status}`);

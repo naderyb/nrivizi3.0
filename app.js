@@ -126,7 +126,8 @@ app.put('/submission/validate/:id', (req, res) => {
 // Endpoint to delete (hard delete) a submission
 app.delete('/submission/:id', (req, res) => {
   const submissionId = req.params.id;
-  const { adminUsername } = req.body;
+  // Lire adminUsername depuis le body ou, si non présent, depuis la query string
+  const adminUsername = req.body.adminUsername || req.query.adminUsername;
   if (!adminUsername) {
     return res.status(400).json({ message: 'Admin username is required.' });
   }
