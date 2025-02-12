@@ -1,18 +1,24 @@
-require('dotenv').config(); // Load environment variables from .env
-const cors = require('cors');
+// app.js
+
+// Load environment variables from .env (for local development)
+require('dotenv').config();
+
 const express = require('express');
 const { Client } = require('pg');
 const bcrypt = require('bcrypt'); // For future secure password handling
+const cors = require('cors');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middleware for parsing JSON and URL-encoded data
+// Middleware for parsing JSON and URL-encoded data, and enable CORS
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-// PostgreSQL connection configuration using the DATABASE_URL environment variable
+// PostgreSQL connection configuration using the DATABASE_URL environment variable.
+// For production on Render, DATABASE_URL should be set to the internal connection string.
+// Fallback (for local testing) connects to a local database named "nexus".
 const client = new Client({
   connectionString: process.env.DATABASE_URL || 'postgresql://postgres:nader%402000@localhost:5432/nexus'
 });
@@ -95,11 +101,7 @@ app.post('/admin/login', (req, res) => {
     }
     return res.status(200).json({
       success: true,
-      admin: {
-        username,
-        fullName,
-        role
-      }
+      admin: { username, fullName, role }
     });
   });
 });
