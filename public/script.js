@@ -59,7 +59,7 @@ inscriptionForm.addEventListener('submit', (e) => {
 });
 
 // Countdown Timer vers le 13 février 2025
-const targetDate = new Date('Feb 13, 2025 00:00:00').getTime();
+const targetDate = new Date('Feb 27, 2025 00:00:00').getTime();
 function updateCountdown() {
     const now = new Date().getTime();
     const gap = targetDate - now;
