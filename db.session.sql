@@ -24,3 +24,4 @@ INSERT into admins (username, password) VALUES
 ('tb_seif', '@nexus2005@'),
 ('bt_selena', '@nexus2005@'),
 ('bd_hadil', '@nexus2005@');
+('gz_kamilia', '@nexus2005@');
