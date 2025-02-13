@@ -95,6 +95,9 @@ app.post('/admin/login', (req, res) => {
     } else if (username === 'bd_hadil') {
       fullName = 'Bedoud Hadil';
       role = 'Organisatrice';
+    } else if (username === 'gz_kamilia') {
+      fullName = 'Guendouz Kamilia';
+      role = 'Organisatrice';
     } else {
       fullName = username;
       role = '';
