@@ -1,64 +1,36 @@
-// Gestion du formulaire d'inscription
+// Gestion du bouton d'inscription
 const openModalBtn = document.getElementById('openModalBtn');
-const closeModalBtn = document.getElementById('closeModalBtn');
-const modal = document.getElementById('modal');
-const modalContent = document.getElementById('modalContent');
-const inscriptionForm = document.getElementById('inscriptionForm');
-const confirmation = document.getElementById('confirmation');
 
-function openModal() {
-    modal.classList.remove('hidden');
-    modalContent.classList.remove('modal-close');
-    modalContent.classList.add('modal-open');
-}
-openModalBtn.addEventListener('click', openModal);
+openModalBtn.addEventListener('click', (event) => {
+    event.preventDefault(); // Prevent default action
 
-closeModalBtn.addEventListener('click', () => {
-    modalContent.classList.remove('modal-open');
-    modalContent.classList.add('modal-close');
-    setTimeout(() => {
-        modal.classList.add('hidden');
-        modalContent.classList.remove('modal-close');
-        inscriptionForm.classList.remove('hidden');
-        confirmation.classList.add('hidden');
-        inscriptionForm.reset();
-    }, 500);
-});
+    // Create the message container
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 
+        "fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 p-4 z-50";
+    messageDiv.innerHTML = `
+        <div class="bg-gray-800 text-white p-6 sm:p-8 rounded-lg shadow-lg text-center max-w-md">
+            <h2 class="text-3xl font-bold text-red-400">⚠️ Désolé !</h2>
+            <p class="mt-3 text-lg text-gray-300">
+                Les inscriptions sont <span class="text-red-500 font-semibold">closes</span>.<br>
+                Revenez plus tard pour d'autres événements incroyables avec le <span class="text-cyan-400 font-bold">Nexus Club</span>! 🚀
+            </p>
+            <button id="closeMessageBtn" class="mt-5 px-6 py-2 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-md">
+                Ok, compris !
+            </button>
+        </div>
+    `;
 
-// Updated form submission handling using Fetch API
-inscriptionForm.addEventListener('submit', (e) => {
-    e.preventDefault(); // Prevent the default form submission
+    // Append message to the body
+    document.body.appendChild(messageDiv);
 
-    // Gather form data from the inputs
-    const formData = {
-        nomPrenom: document.getElementById('nomPrenom').value,
-        email: document.getElementById('email').value,
-        formation: document.getElementById('formation').value,
-        motivation: document.getElementById('motivation').value
-    };
-
-    // Send the data to the /process-form endpoint
-    fetch('/process-form', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Success:', data);
-        // Hide the form and display the pre-prepared confirmation message
-        inscriptionForm.classList.add('hidden');
-        confirmation.classList.remove('hidden');
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        // Optionally, you could display an error message to the user here
+    // Close the message when clicking the button
+    document.getElementById("closeMessageBtn").addEventListener("click", function () {
+        messageDiv.remove();
     });
 });
 
-// Countdown Timer vers le 13 février 2025
+// Countdown Timer
 const targetDate = new Date('Feb 25, 2025 00:00:00').getTime();
 function updateCountdown() {
     const now = new Date().getTime();
@@ -86,4 +58,3 @@ function updateCountdown() {
 
 updateCountdown();
 const countdownInterval = setInterval(updateCountdown, 1000);
-
